@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-q(xez^dxsb*g=k!-lu^iml*m(bzu%+d^=*q^0anb_&=lu0ei1@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -78,13 +78,21 @@ WSGI_APPLICATION = 'services_full.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+    'local': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'bdinventario',
         'USER': 'admin',
         'PASSWORD': 'admin',
         'HOST': 'localhost',
         'PORT': '5432',
+    },
+      'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'railway',
+        'USER': 'postgres',
+        'PASSWORD': '2xg8aKVRpyJGRvCYC57l',
+        'HOST': 'containers-us-west-184.railway.app',
+        'PORT': '6232',
     }
 }
 
