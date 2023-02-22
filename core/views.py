@@ -1,17 +1,24 @@
 from django.shortcuts import render
-from rest_framework import generics
-from .serializers import CategoriasSerializer,ProductosSerializer
-from .models import Categorias,Productos
+from rest_framework import generics,status
+from .serializers import CategoriasSerializer,ProductosSerializer,proveedor_serializar
+from .models import Categorias,Productos,Proveedor
 
 #importando  la tabla users
 from django.contrib.auth.models import User
 import json
-from django.http import HttpResponse
+from django.http import HttpResponse,JsonResponse
 from rest_framework.permissions import AllowAny,IsAuthenticated
 #importando  la tabla tokens
 from rest_framework.authtoken.models import Token
 
-# Create your views here.
+#me permite realizar la autenticacion hacia la BD
+from django.contrib.auth import authenticate
+
+# importar el decorador para realizar los metodos get,post,delete
+from rest_framework.decorators import api_view
+
+#importar la libreria para parsear los datos en JSON
+from rest_framework.parsers import JSONParser
 
 class ProductosList(generics.ListAPIView):
     #SELECT * FROM PRODUCTOS
@@ -47,7 +54,6 @@ class CategoriasUpdate(generics.UpdateAPIView):
     lookup_field="pk"    
 
 
-
 #Los Siguentes Servicios permitiran dar de alta a nuevos usuario y  acceder al app
 
 class RegistrarUsuarios(generics.CreateAPIView):
@@ -74,3 +80,69 @@ class RegistrarUsuarios(generics.CreateAPIView):
         #convierte la cade de texto msg a Json
         rpta=json.dumps(msg)
         return HttpResponse(rpta,content_type='application/json')
+
+
+class LoginUsuario(generics.CreateAPIView):
+        
+        def post(self,request):
+            usuario = request.data["username"]
+            contraseña= request.data["password"]
+            usuario =authenticate(username=usuario,password=contraseña)
+            if usuario:
+                token_usuario=Token.objects.get(user_id=usuario.id)
+                msg ={
+                    "nombre" :usuario.first_name,
+                    "apellido" :usuario.last_name,
+                    "correo" :usuario.email,
+                    "key":token_usuario.key
+                }
+            else:
+                 msg={'error':'Credenciales Invalidas'}
+            rpta=json.dumps(msg)
+            return HttpResponse(rpta,content_type='application/json')     
+
+#Crear un servicio que me permita relaizar el GET,POST,DELETE
+@api_view(['GET','POST'])
+def prove_ser_full(request):
+    if request.method=='GET':
+        #SELECT * FROM PROVEEDOR
+        proveedores=Proveedor.objects.all()
+    elif request.method =='POST':
+        provee_data = JSONParser().parse(request)
+        provee_serializer=proveedor_serializar(data=provee_data)
+        if provee_serializer.is_valid():
+            provee_serializer.save()
+            return JsonResponse(provee_serializer.data,status=status.HTTP_201_CREATED)
+        return JsonResponse(provee_serializer.errors,status=status.HTTP_400_BAD_REQUEST)    
+    provee_serializer=proveedor_serializar(proveedores,many=True) 
+    return JsonResponse(provee_serializer.data,safe=False)
+
+#Crear un servicio que me permita relaizar el GET DETalle
+@api_view(['GET','DELETE','PUT'])
+def prove_ser_detail(request,pk):
+    #seleccionado el proveedor que mostrare en el detalle
+    proveedor=Proveedor.objects.get(id=pk)
+    if request.method == 'GET':
+        #SELECT * FROM PROVEEDOR WHERE ID=PK
+        provee_serializer=proveedor_serializar(proveedor) 
+        return JsonResponse(provee_serializer.data)
+    elif request.method=='DELETE':
+        proveedor.delete()
+        return JsonResponse({'Message':'El Proveedor se elimino con exito'},status=status.HTTP_400_BAD_REQUEST)
+    elif request.method=='PUT':
+        provee_data = JSONParser().parse(request)
+        provee_serializer=proveedor_serializar(proveedor,data=provee_data)
+        if provee_serializer.is_valid():
+            provee_serializer.save()
+            return JsonResponse(provee_serializer.data)
+        return JsonResponse(provee_serializer.errors,status=status.HTTP_400_BAD_REQUEST)  
+
+
+
+
+
+
+
+
+
+    
