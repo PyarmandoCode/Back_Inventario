@@ -10,6 +10,11 @@ class ProductosList(generics.ListAPIView):
     queryset = Productos.objects.all()
     serializer_class = ProductosSerializer
 
+class ProductosCreate(generics.CreateAPIView):
+    #SELECT * FROM PRODUCTOS
+    queryset = Productos.objects.all()
+    serializer_class = ProductosSerializer    
+
 #Vista Basada en clase  que me permitira hacer el metodo GET
 class CategoriasList(generics.ListAPIView):
     #SELECT * FROM CATEGORIAS
