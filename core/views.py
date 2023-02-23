@@ -24,6 +24,7 @@ class ProductosList(generics.ListAPIView):
     #SELECT * FROM PRODUCTOS
     queryset = Productos.objects.all()
     serializer_class = ProductosSerializer
+    permission_classes=(AllowAny,)
 
 class ProductosCreate(generics.CreateAPIView):
     #SELECT * FROM PRODUCTOS

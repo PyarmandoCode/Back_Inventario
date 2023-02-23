@@ -28,7 +28,7 @@ class Productos(models.Model):
     producto_estado=models.BooleanField(default=True)
     producto_stock=models.IntegerField()
     categoria=models.ForeignKey(Categorias,on_delete=models.CASCADE)
-    proveedor=models.ForeignKey(Proveedor,on_delete=models.CASCADE,blank=True,null=True)
+    #proveedor=models.ForeignKey(Proveedor,on_delete=models.CASCADE,blank=True,null=True)
 
     def __str__(self):
         return self.producto_nombre
